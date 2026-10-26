@@ -1,0 +1,44 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm run server:build"
+
+[deploy]
+startCommand = "NODE_ENV=production node server_dist/index.js"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# ── EdenMux Railway Deployment ──────────────────────────────────────────────
+#
+# This file lets you host the EdenMux backend on Railway (railway.app) instead
+# of Replit. Use this if you ever want the backend completely independent of
+# your Replit subscription.
+#
+# SETUP STEPS:
+# 1. Push the repo to GitHub (or connect Railway directly to this Replit via GitHub)
+# 2. Create a new Railway project → "Deploy from GitHub repo"
+# 3. Railway auto-detects this file and runs the build + start commands above
+# 4. Add a PostgreSQL plugin in Railway (one click) — Railway sets DATABASE_URL automatically
+# 5. Set these environment variables in Railway's dashboard:
+#
+#    XAI_API_KEY          = your xAI / Grok API key
+#    ELEVENLABS_API_KEY   = your ElevenLabs key
+#    SESSION_SECRET       = any long random string
+#    ADMIN_SECRET         = any long random string (for /api/admin/* endpoints)
+#    APP_PUBLIC_URL       = https://your-railway-app.up.railway.app
+#    NODE_ENV             = production
+#
+# 6. After Railway gives you a domain (e.g. edenmux-backend.up.railway.app),
+#    update EXPO_PUBLIC_DOMAIN in eas.json to that domain (no https://, no port)
+#    and rebuild the APK/IPA via EAS.
+#
+# 7. To point the already-deployed Replit backend at Railway instead, just
+#    update the hardcoded origin in server/index.ts setupCors() too.
+#
+# COST: Railway hobby plan is $5/month flat. PostgreSQL addon is included.
+# That's it — no surprises, no per-seat pricing, no sleep timeouts.
+#
+# DATABASE MIGRATION:
+# Export your Replit DB first:
+#   pg_dump $DATABASE_URL > edenmux_backup.sql
+# Then import into Railway's Postgres:
+#   psql $RAILWAY_DATABASE_URL < edenmux_backup.sql

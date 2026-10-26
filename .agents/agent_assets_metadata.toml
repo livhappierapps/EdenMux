@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "_rSyZ3oMKk50UKtYXQOeg"
+uri = "file://mdb_export.zip"
+type = "unspecified"
+title = "MDB — mommydevbeta export (18 files)"
+
+[[outputs]]
+id = "rMi3rIvm-hvKSVASjHqFD"
+uri = "file://assets/mdb_code.zip"
+type = "unspecified"
+title = "mdb_code.zip — 38 KB, all 16 code files"
+
+[[outputs]]
+id = "RNGJne6OGe2mUwxAbka-J"
+uri = "file://edenmux_code.zip"
+type = "unspecified"
+title = "EdenMux — full source code (59 files, 1.6 MB)"

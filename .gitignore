@@ -1,0 +1,68 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Build output
+server_dist/
+dist/
+web-build/
+
+# Replit internal
+.local/
+.cache/
+EDENMUX_FULL_SOURCE.txt
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pfx
+*.keystore
+id_rsa*
+id_ed25519*
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# Local environment and credential files
+.env*
+!.env.example
+!.env.*.example
+!.env.template
+!.env.*.template
+*.secret
+*.secret.*
+secrets.json
+secrets.*.json
+credentials.json
+credentials.*.json
+service-account*.json
+.npmrc
+.pypirc
+.netrc
+attached_assets/
+
+# typescript
+*.tsbuildinfo
+.vercel

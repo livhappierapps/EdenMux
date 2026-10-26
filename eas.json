@@ -1,0 +1,61 @@
+{
+  "cli": {
+    "version": ">= 14.0.0",
+    "promptToConfigurePushNotifications": false,
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "node": "22.22.0",
+      "env": {
+        "NPM_CONFIG_IGNORE_SCRIPTS": "true",
+        "EXPO_PUBLIC_DOMAIN": "eden-mux--LivHappierApps.replit.app"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "production": {
+      "channel": "production",
+      "node": "22.22.0",
+      "env": {
+        "NPM_CONFIG_IGNORE_SCRIPTS": "true",
+        "EXPO_PUBLIC_DOMAIN": "eden-mux--LivHappierApps.replit.app"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "simulator": false
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": false
+      },
+      "ios": {
+        "ascAppId": "6761677068"
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+entrypoint = "README.md"
+modules = ["nodejs-22", "python-3.11", "postgresql-16"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "server:build"]
+run = ["node", "server_dist/index.js"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[[ports]]
+localPort = 8082
+externalPort = 3000
+
+[env]
+PORT = "5000"
+
+[agent]
+stack = "EXPO"
+integrations = ["revenuecat:1.0.0"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start Frontend"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start Backend"
+
+[[workflows.workflow]]
+name = "Start App"
+author = "agent"
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start Backend"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start Frontend"
+
+[[workflows.workflow]]
+name = "Start Backend"
+author = "agent"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run server:dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "Start Frontend"
+author = "agent"
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run expo:dev"
+waitForPort = 8081
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[userenv]
+
+[userenv.production]
+
+[userenv.shared]
+EXPO_PUBLIC_APP_STORE_ID = "6761677068"
+EAS_PROJECT_ID = "fab54c51-dc11-48fc-be0b-68f8619ee11e"
+REVENUECAT_APPLE_APP_STORE_APP_ID = "appac475d54dc"
+REVENUECAT_GOOGLE_PLAY_STORE_APP_ID = "app47e1de15c7"
+REVENUECAT_PROJECT_ID = "proj9bfc04c3"
+REVENUECAT_TEST_STORE_APP_ID = "app93af3e512c"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 120000
