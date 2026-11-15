@@ -39,9 +39,9 @@ function setupCors(app: express.Application) {
     // Extra allowed origins for external hosting (comma-separated, no trailing slash).
     if (process.env.ALLOWED_ORIGINS) {
       process.env.ALLOWED_ORIGINS.split(",")
-        .map((o) => o.trim().replace(/\/$/, ""))
+        .map((o: string) => o.trim().replace(/\/$/, ""))
         .filter(Boolean)
-        .forEach((o) => origins.add(o));
+        .forEach((o: string) => origins.add(o));
     }
 
     // APP_PUBLIC_URL env var for self-declared production origin
