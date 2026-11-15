@@ -42,7 +42,6 @@ export class ShellClient {
 
       this.ws.onopen = () => {
         this.ws?.send(JSON.stringify({ type: 'auth', token: this.token }));
-        this.connected = true;
         this.pingInterval = setInterval(() => {
           if (this.ws?.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ type: 'ping' }));
@@ -54,6 +53,7 @@ export class ShellClient {
         try {
           const msg = JSON.parse(event.data);
           if (msg.type === 'ready') {
+            this.connected = true;
             this.opts.onReady();
           } else if (msg.type === 'data') {
             this.opts.onData(msg.data);
@@ -67,7 +67,10 @@ export class ShellClient {
         this.connected = false;
         this._clearPing();
         this.opts.onDisconnect();
-        if (!this.dead && event.code !== 4401) {
+        if (event.code === 4503) {
+          this.opts.onData('\r\nRemote shell is unavailable until isolated execution is configured. Use the local terminal.\r\n');
+        }
+        if (!this.dead && ![4400, 4401, 4403, 4503].includes(event.code)) {
           this.reconnectTimer = setTimeout(() => this.connect(), 3000);
         }
       };

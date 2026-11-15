@@ -123,7 +123,7 @@ function TerminalView() {
     const errorCount = activeSession.lines.filter(l => l.type === 'error').length;
     if (errorCount > errorCountRef.current) triggerError();
     errorCountRef.current = errorCount;
-  }, [activeSession.lines]);
+  }, [activeSession.lines, triggerError]);
 
   const webTopInset = Platform.OS === 'web' ? 67 : 0;
   const webBottomInset = Platform.OS === 'web' ? 34 : 0;
@@ -139,10 +139,6 @@ function TerminalView() {
   const shellDotColor = shellMode
     ? (shellConnected ? tc.success || '#4ade80' : tc.rose)
     : tc.accent;
-
-  const shellDotTitle = shellMode
-    ? (shellConnected ? 'Linux shell active' : 'Connecting...')
-    : 'Local shell';
 
   return (
     <View style={[styles.container, { backgroundColor: tc.bg }]}>
