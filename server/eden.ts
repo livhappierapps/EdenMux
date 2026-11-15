@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { pool } from "./db";
 import { verifyJwtToken } from "./auth";
 import { hasCoreUnlock } from "./revenuecat";
+import { getSecurityTeachingContext } from "./security-education";
 
 export async function initEdenDB() {
   try {
@@ -351,7 +352,10 @@ export async function handleEdenChat(req: Request, res: Response) {
       : null;
     const memory = memResult?.rows[0]?.summary || "";
 
-    const systemContent = buildSystemPrompt(platform, memory, isExtendedUser);
+    const systemContent = [
+      buildSystemPrompt(platform, memory, isExtendedUser),
+      getSecurityTeachingContext(messages),
+    ].filter(Boolean).join("\n\n");
 
     const apiMessages = [
       { role: "system", content: systemContent },
