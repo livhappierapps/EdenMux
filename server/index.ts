@@ -31,14 +31,18 @@ function setupCors(app: express.Application) {
 
     // Replit deployment domains (auto-set by Replit in the deployed environment)
     if (process.env.REPLIT_DOMAINS) {
-      process.env.REPLIT_DOMAINS.split(",").forEach((d) => {
+      process.env.REPLIT_DOMAINS.split(",").forEach((d: string) => {
         origins.add(`https://${d.trim()}`);
       });
     }
 
-    // Stable production URL — hardcoded so it works even on external hosting
-    // where REPLIT_DOMAINS is absent. Update this if the backend ever moves.
-    origins.add("https://eden-mux--LivHappierApps.replit.app");
+    // Extra allowed origins for external hosting (comma-separated, no trailing slash).
+    if (process.env.ALLOWED_ORIGINS) {
+      process.env.ALLOWED_ORIGINS.split(",")
+        .map((o: string) => o.trim().replace(/\/$/, ""))
+        .filter(Boolean)
+        .forEach((o: string) => origins.add(o));
+    }
 
     // APP_PUBLIC_URL env var for self-declared production origin
     // (set this as a secret when deploying externally, e.g. on Railway)
