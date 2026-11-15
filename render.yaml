@@ -1,0 +1,40 @@
+# EdenMux backend on Render (not yet deployed — production DB is still at Replit).
+# Create via Render Blueprint only after the database has been exported.
+services:
+  - type: web
+    name: edenmux-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run server:build
+    startCommand: NODE_ENV=production node server_dist/index.js
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # Secrets — set in the Render dashboard, never commit values.
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: ADMIN_SECRET
+        sync: false
+      - key: XAI_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: REVENUECAT_SECRET_KEY
+        sync: false
+      - key: REVENUECAT_API_KEY
+        sync: false
+      # Public URL of this service (password-reset links + CORS), e.g. https://edenmux-api.onrender.com
+      - key: APP_PUBLIC_URL
+        sync: false
+      # Optional extra web origins, comma-separated
+      - key: ALLOWED_ORIGINS
+        sync: false
