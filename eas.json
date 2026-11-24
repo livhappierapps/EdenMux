@@ -2,7 +2,7 @@
   "cli": {
     "version": ">= 14.0.0",
     "promptToConfigurePushNotifications": false,
-    "appVersionSource": "local"
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -21,8 +21,21 @@
       "channel": "preview",
       "node": "22.22.0",
       "env": {
-        "NPM_CONFIG_IGNORE_SCRIPTS": "true",
-        "EXPO_PUBLIC_DOMAIN": "eden-mux--LivHappierApps.replit.app"
+        "NPM_CONFIG_IGNORE_SCRIPTS": "true"
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+    "ios-device": {
+      "distribution": "internal",
+      "channel": "preview",
+      "node": "22.22.0",
+      "env": {
+        "NPM_CONFIG_IGNORE_SCRIPTS": "true"
       },
       "android": {
         "buildType": "apk"
@@ -35,8 +48,7 @@
       "channel": "production",
       "node": "22.22.0",
       "env": {
-        "NPM_CONFIG_IGNORE_SCRIPTS": "true",
-        "EXPO_PUBLIC_DOMAIN": "eden-mux--LivHappierApps.replit.app"
+        "NPM_CONFIG_IGNORE_SCRIPTS": "true"
       },
       "android": {
         "buildType": "app-bundle"
