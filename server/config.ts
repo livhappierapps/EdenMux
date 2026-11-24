@@ -102,6 +102,9 @@ export async function handleGetConfig(_req: Request, res: Response) {
     );
     const stored = result.rows[0]?.config ?? {};
     const merged = deepMerge(DEFAULT_CONFIG as unknown as Record<string, unknown>, stored) as unknown as AppConfig;
+    // Stored flags cannot re-enable the shared backend PTY while execution
+    // isolation is unavailable.
+    merged.features.shellMode = false;
     res.json(merged);
   } catch (e) {
     const errorType = e instanceof Error ? e.name : "UnknownError";
@@ -121,6 +124,9 @@ export async function handleSetConfig(req: Request, res: Response) {
   const body = req.body as Partial<AppConfig>;
   if (!body || typeof body !== "object") {
     return res.status(400).json({ error: "Invalid config body" });
+  }
+  if (body.features?.shellMode === true) {
+    return res.status(409).json({ error: "Remote shell requires an isolated execution service." });
   }
 
   try {

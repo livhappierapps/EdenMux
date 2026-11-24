@@ -44,49 +44,6 @@ async function withShellServer(
   }
 }
 
-function waitForMessage(
-  socket: WebSocket,
-  predicate: (message: Record<string, unknown>) => boolean,
-) {
-  return new Promise<Record<string, unknown>>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error("Timed out waiting for a WebSocket message."));
-    }, 5_000);
-
-    const onMessage = (raw: WebSocket.RawData) => {
-      let message: Record<string, unknown>;
-      try {
-        message = JSON.parse(raw.toString()) as Record<string, unknown>;
-      } catch {
-        return;
-      }
-      if (predicate(message)) {
-        cleanup();
-        resolve(message);
-      }
-    };
-    const onClose = () => {
-      cleanup();
-      reject(new Error("WebSocket closed before the expected message."));
-    };
-    const onError = (error: Error) => {
-      cleanup();
-      reject(error);
-    };
-    const cleanup = () => {
-      clearTimeout(timeout);
-      socket.off("message", onMessage);
-      socket.off("close", onClose);
-      socket.off("error", onError);
-    };
-
-    socket.on("message", onMessage);
-    socket.once("close", onClose);
-    socket.once("error", onError);
-  });
-}
-
 function waitForClose(socket: WebSocket) {
   return new Promise<{ code: number; reason: string }>((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -104,19 +61,18 @@ function waitForClose(socket: WebSocket) {
   });
 }
 
-test("shell accepts a valid JWT in the first WebSocket message", async () => {
+test("shell blocks even authenticated execution until isolation is available", async () => {
   await withShellServer(async (connect) => {
     const socket = await connect("?sessionId=first-message-auth-test");
-    const ready = waitForMessage(socket, (message) => message.type === "ready");
+    const closed = waitForClose(socket);
     socket.send(JSON.stringify({
       type: "auth",
       token: jwt.sign({ userId: "shell-ws-test-user" }, TEST_SECRET, { expiresIn: "1m" }),
     }));
 
-    assert.equal((await ready).type, "ready");
-    const closed = waitForClose(socket);
-    socket.send(JSON.stringify({ type: "input", data: "exit\r" }));
-    await closed;
+    const result = await closed;
+    assert.equal(result.code, 4503);
+    assert.match(result.reason, /isolated execution required/);
   });
 });
 
@@ -141,6 +97,36 @@ test("shell rejects messages from connections with no authentication", async () 
     const closed = waitForClose(socket);
     socket.send(JSON.stringify({ type: "ping" }));
 
+    assert.equal((await closed).code, 4401);
+  });
+});
+
+test("shell keeps the iOS restriction for authenticated clients", async () => {
+  await withShellServer(async (connect) => {
+    const socket = await connect();
+    const closed = waitForClose(socket);
+    socket.send(JSON.stringify({
+      type: "auth",
+      token: jwt.sign({ userId: "ios-lab-test-user", platform: "ios" }, TEST_SECRET, { expiresIn: "1m" }),
+    }));
+    assert.equal((await closed).code, 4403);
+  });
+});
+
+test("shell rejects malformed messages without starting execution", async () => {
+  await withShellServer(async (connect) => {
+    const socket = await connect();
+    const closed = waitForClose(socket);
+    socket.send("{");
+    assert.equal((await closed).code, 4400);
+  });
+});
+
+test("shell rejects an invalid JWT", async () => {
+  await withShellServer(async (connect) => {
+    const socket = await connect();
+    const closed = waitForClose(socket);
+    socket.send(JSON.stringify({ type: "auth", token: "not-a-jwt" }));
     assert.equal((await closed).code, 4401);
   });
 });

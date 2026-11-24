@@ -58,9 +58,11 @@ function ThinkingDots({ accent }: { accent: string }) {
           Animated.timing(dot, { toValue: 1, duration: 400, useNativeDriver: true }),
           Animated.timing(dot, { toValue: 0.3, duration: 400, useNativeDriver: true }),
         ])
-      ).start();
-    animate(dot1, 0); animate(dot2, 150); animate(dot3, 300);
-  }, []);
+      );
+    const animations = [animate(dot1, 0), animate(dot2, 150), animate(dot3, 300)];
+    animations.forEach(animation => animation.start());
+    return () => animations.forEach(animation => animation.stop());
+  }, [dot1, dot2, dot3]);
 
   return (
     <View style={bubbleStyles.row}>
@@ -237,7 +239,7 @@ function SettingsDrawer({
         <View style={settingsStyles.textCol}>
           <Text style={[settingsStyles.label, { fontFamily: titleFont, color: tc.cream }]}>Hide Eden</Text>
           <Text style={[settingsStyles.desc, { fontFamily: monoFont, color: tc.textDim }]}>
-            Removes Eden's panel entirely. She'll still appear to warn you before a ban.
+            Removes Eden&apos;s panel entirely. She&apos;ll still appear to warn you before a ban.
           </Text>
         </View>
         <Switch
@@ -268,7 +270,7 @@ function SettingsDrawer({
 
       <View style={settingsStyles.donationSection}>
         <Text style={[settingsStyles.donationMsg, { fontFamily: monoFont }]}>
-          EdenMux was created by a broke single mother of four, if anyone could use a coffee it's her. :p Want to buy her a coffee?
+          EdenMux was created by a broke single mother of four, if anyone could use a coffee it&apos;s her. :p Want to buy her a coffee?
         </Text>
         <Pressable
           onPress={() => Linking.openURL('https://cash.app/$OblivionHappier58137')}
@@ -348,7 +350,7 @@ function SettingsDrawer({
               </Pressable>
             </View>
             {codeStatus === 'fail' && (
-              <Text style={[settingsStyles.codeMsg, { fontFamily: monoFont, color: tc.error }]}>That code isn't right.</Text>
+              <Text style={[settingsStyles.codeMsg, { fontFamily: monoFont, color: tc.error }]}>That code isn&apos;t right.</Text>
             )}
             {codeStatus === 'ok' && (
               <Text style={[settingsStyles.codeMsg, { fontFamily: monoFont, color: tc.success }]}>Welcome to the garden. ✦</Text>
@@ -417,7 +419,7 @@ export default function EdenPanel() {
   useEffect(() => {
     const toAdd = unlockedThemeIds.filter(id => !unlockedThemes.includes(id));
     if (toAdd.length > 0) unlockThemes(unlockedThemeIds);
-  }, [unlockedThemeIds]);
+  }, [unlockedThemeIds, unlockedThemes, unlockThemes]);
 
   const [input, setInput] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -441,6 +443,7 @@ export default function EdenPanel() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const insets = useSafeAreaInsets();
   const keyboardY = useRef(new Animated.Value(0)).current;
+  const speakTextRef = useRef<(text: string) => Promise<void>>(async () => {});
 
   useEffect(() => {
     Animated.spring(expandAnim, {
@@ -449,7 +452,7 @@ export default function EdenPanel() {
       tension: 80,
       friction: 10,
     }).start();
-  }, [isOpen]);
+  }, [isOpen, expandAnim]);
 
   useEffect(() => {
     if (isOpen) setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
@@ -476,7 +479,7 @@ export default function EdenPanel() {
       pulseAnim.stopAnimation();
       Animated.timing(pulseAnim, { toValue: 1, duration: 150, useNativeDriver: true }).start();
     }
-  }, [isRecording]);
+  }, [isRecording, pulseAnim]);
 
   useEffect(() => {
     if (wasThinkingRef.current && !isThinking) {
@@ -488,7 +491,7 @@ export default function EdenPanel() {
           lastEdenMsgIdRef.current = lastEden.id;
           setTimeout(() => {
             const text = lastEden.content;
-            if (text) speakText(text);
+            if (text) void speakTextRef.current(text);
           }, 300);
         }
       }
@@ -504,19 +507,19 @@ export default function EdenPanel() {
     if (pendingGreeting) return;
     if (hasCoreAccess && isAutoSpeakRef.current && config.features.voiceInput) {
       setTimeout(() => {
-        if (lastEden.content) speakText(lastEden.content);
+        if (lastEden.content) void speakTextRef.current(lastEden.content);
       }, 400);
     }
-  }, [messages, isThinking, pendingGreeting, hasCoreAccess]);
+  }, [messages, isThinking, pendingGreeting, hasCoreAccess, config.features.voiceInput]);
 
   useEffect(() => {
     if (!pendingGreeting) return;
     const timer = setTimeout(() => {
-      if (hasCoreAccess && isAutoSpeakRef.current && config.features.voiceInput) speakText(pendingGreeting);
+      if (hasCoreAccess && isAutoSpeakRef.current && config.features.voiceInput) void speakTextRef.current(pendingGreeting);
       clearPendingGreeting();
     }, 2000);
     return () => clearTimeout(timer);
-  }, [pendingGreeting, hasCoreAccess]);
+  }, [pendingGreeting, hasCoreAccess, config.features.voiceInput, clearPendingGreeting]);
 
   useEffect(() => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
@@ -532,7 +535,7 @@ export default function EdenPanel() {
       Animated.timing(keyboardY, { toValue: 0, duration: 180, useNativeDriver: true }).start();
     });
     return () => { onShow.remove(); onHide.remove(); };
-  }, []);
+  }, [keyboardY]);
 
   const handleSend = async () => {
     const text = input.trim();
@@ -605,6 +608,10 @@ export default function EdenPanel() {
     if (isSpeaking) { await stopSpeaking(); return; }
     await speakText(lastEden.content);
   };
+
+  useEffect(() => {
+    speakTextRef.current = speakText;
+  });
 
   const handleMicPress = async () => {
     if (isTranscribing) return;
