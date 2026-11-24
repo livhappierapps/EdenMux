@@ -31,7 +31,7 @@ function setupCors(app: express.Application) {
 
     // Replit deployment domains (auto-set by Replit in the deployed environment)
     if (process.env.REPLIT_DOMAINS) {
-      process.env.REPLIT_DOMAINS.split(",").forEach((d) => {
+      process.env.REPLIT_DOMAINS.split(",").forEach((d: string) => {
         origins.add(`https://${d.trim()}`);
       });
     }

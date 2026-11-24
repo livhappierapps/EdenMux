@@ -24,7 +24,8 @@
     "version:bump": "node scripts/version-bump.js",
     "version:bump:minor": "node scripts/version-bump.js minor",
     "version:bump:major": "node scripts/version-bump.js major",
-    "version:check": "node scripts/check-version.js"
+    "version:check": "node scripts/check-version.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@expo-google-fonts/cinzel": "^0.4.2",
